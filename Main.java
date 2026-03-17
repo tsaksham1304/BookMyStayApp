@@ -1,17 +1,5 @@
-/**
- * Hotel Booking Management System
- * Use Case 4: Room Search & Availability Check
- *
- * This program demonstrates read-only search functionality
- * using inventory and room domain models.
- *
- * @author Saksham
- * @version 4.0
- */
-
 import java.util.*;
 
-// Abstract Room class (Domain Model)
 abstract class Room {
     protected String roomType;
     protected int beds;
@@ -34,7 +22,6 @@ abstract class Room {
     }
 }
 
-// Concrete Room Classes
 class SingleRoom extends Room {
     public SingleRoom() {
         super("Single Room", 1, 2000);
@@ -53,67 +40,80 @@ class SuiteRoom extends Room {
     }
 }
 
-// Inventory (State Holder)
 class RoomInventory {
     private HashMap<String, Integer> inventory;
 
     public RoomInventory() {
         inventory = new HashMap<>();
         inventory.put("Single Room", 5);
-        inventory.put("Double Room", 0); // Example: unavailable
+        inventory.put("Double Room", 3);
         inventory.put("Suite Room", 2);
     }
 
-    // Read-only access
     public int getAvailability(String roomType) {
         return inventory.getOrDefault(roomType, 0);
     }
 }
 
-// Search Service (Read-only logic)
-class RoomSearchService {
+class Reservation {
+    private String guestName;
+    private String roomType;
 
-    public void searchAvailableRooms(RoomInventory inventory, List<Room> rooms) {
+    public Reservation(String guestName, String roomType) {
+        this.guestName = guestName;
+        this.roomType = roomType;
+    }
 
-        System.out.println("---- Available Rooms ----\n");
+    public String getGuestName() {
+        return guestName;
+    }
 
-        for (Room room : rooms) {
+    public String getRoomType() {
+        return roomType;
+    }
 
-            int available = inventory.getAvailability(room.getRoomType());
-
-            // Defensive check: show only available rooms
-            if (available > 0) {
-                room.displayDetails();
-                System.out.println("Available: " + available);
-                System.out.println("-------------------------");
-            }
-        }
+    public void display() {
+        System.out.println("Guest: " + guestName + " | Room: " + roomType);
     }
 }
 
-// Main Class
-public class Main {
+class BookingQueue {
+    private Queue<Reservation> queue;
 
+    public BookingQueue() {
+        queue = new LinkedList<>();
+    }
+
+    public void addRequest(Reservation reservation) {
+        queue.offer(reservation);
+    }
+
+    public void displayQueue() {
+        System.out.println("---- Booking Requests (FIFO Order) ----");
+        for (Reservation r : queue) {
+            r.display();
+        }
+        System.out.println("--------------------------------------");
+    }
+}
+
+public class Main {
     public static void main(String[] args) {
 
         System.out.println("=======================================");
         System.out.println("   Welcome to Book My Stay Application");
-        System.out.println("   Hotel Booking System v4.0");
+        System.out.println("   Hotel Booking System v5.0");
         System.out.println("=======================================\n");
 
-        // Initialize inventory
-        RoomInventory inventory = new RoomInventory();
+        BookingQueue bookingQueue = new BookingQueue();
 
-        // Create room objects
-        List<Room> rooms = new ArrayList<>();
-        rooms.add(new SingleRoom());
-        rooms.add(new DoubleRoom());
-        rooms.add(new SuiteRoom());
+        bookingQueue.addRequest(new Reservation("Amit", "Single Room"));
+        bookingQueue.addRequest(new Reservation("Riya", "Suite Room"));
+        bookingQueue.addRequest(new Reservation("Karan", "Double Room"));
+        bookingQueue.addRequest(new Reservation("Neha", "Single Room"));
 
-        // Perform search (READ-ONLY)
-        RoomSearchService searchService = new RoomSearchService();
-        searchService.searchAvailableRooms(inventory, rooms);
+        bookingQueue.displayQueue();
 
-        System.out.println("\nSearch completed. No changes made to inventory.");
+        System.out.println("\nRequests stored successfully. No allocation done yet.");
     }
 }
